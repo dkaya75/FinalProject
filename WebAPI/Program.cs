@@ -1,4 +1,4 @@
-using Autofac;
+ï»¿using Autofac;
 using Autofac.Extensions.DependencyInjection;
 using Business.DependencyResolvers.Autofac;
 using Microsoft.AspNetCore.Hosting;
@@ -20,8 +20,8 @@ namespace WebAPI
         }
 
         public static IHostBuilder CreateHostBuilder(string[] args) =>
-            Host.CreateDefaultBuilder(args) 
-            //burada autofac konfigürasyonlarý yaptýk
+            Host.CreateDefaultBuilder(args)
+            //burada autofac konfigï¿½rasyonlarï¿½ yaptï¿½k
             .UseServiceProviderFactory(new  AutofacServiceProviderFactory())
             .ConfigureContainer<ContainerBuilder>(builder=>
             {

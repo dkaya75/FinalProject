@@ -27,6 +27,13 @@ namespace Business.Concrete
         [ValidationAspect(typeof(ProductValidator))]//add metodunu doğrula ProductValidator daki kurallara göre
         public IResult Add(Product product)
         {
+            //business codes
+
+            if (product.ProductName.Length < 2)
+            {
+                //magic strings
+                return new ErrorResult(Messages.ProductNameInvalid);
+            }
             //business codes:kurallarımın olduğu kod kısmı bu iki kod birbirinden ayrı yazılır karıştırlmamalıdır
             //validation codes:doğrulama kodu girilen bilginin yapısının iş koduna uygun olup olmadığını kontrol eder
             _productDal.Add(product);
