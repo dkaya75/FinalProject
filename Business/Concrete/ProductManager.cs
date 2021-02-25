@@ -1,8 +1,10 @@
 ﻿using Business.Abstract;
+using Business.CCS;
 using Business.Constants;
 using Business.ValidationRules.FluentValidation;
 using Core.Aspects.Autofac.Validation;
 using Core.CrossCuttingConcerns.Validation;
+using Core.Utilities.Business;
 using Core.Utilities.Results;
 using DataAccess.Abstract;
 using DataAccess.Concrete.InMemory;
@@ -11,31 +13,34 @@ using Entities.DTOs;
 using FluentValidation;
 using System;
 using System.Collections.Generic;
+using System.Linq;
 using System.Text;
 
 namespace Business.Concrete
 {
     public class ProductManager : IProductService
     {
-        IProductDal _productDal;
+        IProductDal _productDal;//prodct ile iş kuralı koymak için product manager ile beraber oluşuyor
+        ICategoryService _categoryService;//category içinse categoryservisi injecte ettim çünkü farklı sevisler
 
-        public ProductManager(IProductDal productDal)
+        public ProductManager(IProductDal productDal, ICategoryService categoryService)
         {
             _productDal = productDal;
+            _categoryService = categoryService;
         }
+       
 
         [ValidationAspect(typeof(ProductValidator))]//add metodunu doğrula ProductValidator daki kurallara göre
         public IResult Add(Product product)
         {
             //business codes
+           IResult result= BusinessRules.Run(CheckIfNameExists(product.ProductName),
+                CheckIfProductCountCategoryCorrect(product.CategoryId));
 
-            if (product.ProductName.Length < 2)
+            if (result!=null)
             {
-                //magic strings
-                return new ErrorResult(Messages.ProductNameInvalid);
+                return result;
             }
-            //business codes:kurallarımın olduğu kod kısmı bu iki kod birbirinden ayrı yazılır karıştırlmamalıdır
-            //validation codes:doğrulama kodu girilen bilginin yapısının iş koduna uygun olup olmadığını kontrol eder
             _productDal.Add(product);
 
             return new SuccessResult(Messages.ProductAdded);
@@ -73,6 +78,42 @@ namespace Business.Concrete
                 return new ErrorDataResult<List<ProductDetailDto>>(Messages.MaintenanceTime);
             }
             return new SuccessDataResult<List<ProductDetailDto>>(_productDal.GetProductDetails());
+        }
+
+        public IResult Update(Product product)
+        {
+            throw new NotImplementedException();
+        }
+        //bu kısım iş kurali olarak ;bir kategory de en fazla 10 ürün olabilir kuralı.Bu metodu artık istediğim yerde kullanabilirim
+       //bu sorgu arka planda select count * from products where categoryıd=1
+        private IResult CheckIfProductCountCategoryCorrect(int categoryId)
+        {
+            var result = _productDal.GetAll(p => p.CategoryId == categoryId).Count;
+            if (result >= 10)
+            {
+                return new ErrorResult(Messages.ProductCountOfCategoryError);
+            }
+            else
+            {
+                return new SuccessResult();
+            }
+        }
+        private IResult CheckIfNameExists(string productName) {
+            var result = _productDal.GetAll(p => p.ProductName==productName).Any();
+            if (result)
+            {
+                return new ErrorResult(Messages.ProductNameAlreadyExists);
+            }
+            return new SuccessResult();
+        }
+        private IResult CheckIfCategoryLimitExceed()
+        {
+            var result = _categoryService.GetAll();
+            if (result.Data.Count>15)
+            {
+                return new ErrorResult(Messages.CategoryLimitExceed);
+            }
+            return new SuccessResult();
         }
     }
 }

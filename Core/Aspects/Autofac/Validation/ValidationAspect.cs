@@ -9,8 +9,9 @@ using System.Text;
 
 namespace Core.Aspects.Autofac.Validation
 {
-    public class ValidationAspect : MethodInterception
+    public class ValidationAspect : MethodInterception//Aspect hata verdiğinde çalışacak kısım
     {
+        //bu kısmıda gönderilen şeyin yani validatortype nin validator olup olmmadığını sorguluyor
         private Type _validatorType;
         public ValidationAspect(Type validatorType)
         {

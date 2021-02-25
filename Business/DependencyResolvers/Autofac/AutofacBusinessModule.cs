@@ -20,6 +20,11 @@ namespace Business.DependencyResolvers.Autofac
             //biri Iproductservice isterse Product manageri register(kayıt) et.Yani biri servici isterse sen ona manager instance (örneği) ver
             builder.RegisterType<EfProductDal>().As<IProductDal>().SingleInstance();
 
+
+            builder.RegisterType<CategoryManager>().As<ICategoryService>().SingleInstance();
+            //biri Iproductservice isterse Product manageri register(kayıt) et.Yani biri servici isterse sen ona manager instance (örneği) ver
+            builder.RegisterType<EfCategoryDal>().As<ICategoryDal>().SingleInstance();
+
             var assembly = System.Reflection.Assembly.GetExecutingAssembly();
 
             builder.RegisterAssemblyTypes(assembly).AsImplementedInterfaces()
